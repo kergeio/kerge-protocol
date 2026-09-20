@@ -4,16 +4,16 @@ The wire protocol between a [Kerge](https://kerge.io) agent and a Kerge
 panel, and the reference implementation both sides build on.
 
 ```
-go get kerge.io/protocol
+go get github.com/kergeio/kerge-protocol
 ```
 
 ## Packages
 
 | Package | Contents |
 |---|---|
-| `kerge.io/protocol` | Message types, strict decoding, and validation of untrusted agent input |
-| `kerge.io/protocol/ifacefilter` | Network interface name matching and the default exclusion list |
-| `kerge.io/protocol/metering` | Turning the reported counters into network rates |
+| `github.com/kergeio/kerge-protocol` | Message types, strict decoding, and validation of untrusted agent input |
+| `github.com/kergeio/kerge-protocol/ifacefilter` | Network interface name matching and the default exclusion list |
+| `github.com/kergeio/kerge-protocol/metering` | Turning the reported counters into network rates |
 
 The module has no dependencies outside the standard library.
 

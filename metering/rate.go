@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"kerge.io/protocol"
-	"kerge.io/protocol/ifacefilter"
+	"github.com/kergeio/kerge-protocol"
+	"github.com/kergeio/kerge-protocol/ifacefilter"
 )
 
 // maxClockSkew is how far the agent's monotonic delta may differ from the

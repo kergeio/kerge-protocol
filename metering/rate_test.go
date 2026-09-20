@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"kerge.io/protocol"
+	"github.com/kergeio/kerge-protocol"
 )
 
 func sample(monoMS int64, counters map[string]protocol.NetCounters) *protocol.Metrics {
