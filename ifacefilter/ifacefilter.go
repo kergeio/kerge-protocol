@@ -7,7 +7,11 @@
 // "eth*" matches "eth0" but not "veth0".
 package ifacefilter
 
-import "strings"
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
 
 // DefaultExclude is the exclusion list both sides fall back to: loopback,
 // container, virtual machine, tunnel and VPN interfaces
@@ -67,4 +71,47 @@ func ParsePatterns(list string) []string {
 		}
 	}
 	return out
+}
+
+// Limits on a stored exclusion list (ValidatePatterns).
+const (
+	// MaxPatternLen is the longest a single pattern may be.
+	MaxPatternLen = 32
+	// MaxPatterns is the most patterns one list may hold.
+	MaxPatterns = 64
+)
+
+// ValidatePatterns parses a comma-separated exclusion list the way
+// ParsePatterns does, but rejects what must never be stored: an empty
+// entry, an over-long pattern, one that is not printable ASCII without
+// spaces, and a list with too many entries. Both sides validate where the
+// list is written -- the agent in its configuration file, the panel in its
+// settings -- so that everything read back is already sound.
+//
+// An empty list is valid and excludes nothing.
+func ValidatePatterns(list string) ([]string, error) {
+	if strings.TrimSpace(list) == "" {
+		return nil, nil
+	}
+	parts := strings.Split(list, ",")
+	if len(parts) > MaxPatterns {
+		return nil, fmt.Errorf("ifacefilter: %d patterns, at most %d are allowed", len(parts), MaxPatterns)
+	}
+	patterns := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		switch {
+		case p == "":
+			return nil, errors.New("ifacefilter: the list contains an empty pattern")
+		case len(p) > MaxPatternLen:
+			return nil, fmt.Errorf("ifacefilter: pattern %q is longer than %d characters", p, MaxPatternLen)
+		}
+		for _, c := range []byte(p) {
+			if c <= ' ' || c > '~' {
+				return nil, fmt.Errorf("ifacefilter: pattern %q must be printable ASCII without spaces", p)
+			}
+		}
+		patterns = append(patterns, p)
+	}
+	return patterns, nil
 }

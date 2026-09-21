@@ -1,6 +1,10 @@
 package ifacefilter
 
-import "testing"
+import (
+	"slices"
+	"strings"
+	"testing"
+)
 
 func TestMatchOne(t *testing.T) {
 	cases := []struct {
@@ -52,5 +56,65 @@ func TestMatch(t *testing.T) {
 	}
 	if Match(nil, "eth0") {
 		t.Error("Match with no patterns = true, want false")
+	}
+}
+
+func TestParsePatterns(t *testing.T) {
+	got := ParsePatterns(" lo , docker* ,, veth* ")
+	want := []string{"lo", "docker*", "veth*"}
+	if !slices.Equal(got, want) {
+		t.Errorf("ParsePatterns = %q, want %q", got, want)
+	}
+	if got := ParsePatterns(""); got != nil {
+		t.Errorf("ParsePatterns(\"\") = %q, want nil", got)
+	}
+}
+
+func TestValidatePatterns(t *testing.T) {
+	got, err := ValidatePatterns(" lo , docker* ")
+	if err != nil {
+		t.Fatalf("ValidatePatterns: %v", err)
+	}
+	if want := []string{"lo", "docker*"}; !slices.Equal(got, want) {
+		t.Errorf("ValidatePatterns = %q, want %q", got, want)
+	}
+	for _, blank := range []string{"", "   "} {
+		got, err := ValidatePatterns(blank)
+		if err != nil || got != nil {
+			t.Errorf("ValidatePatterns(%q) = %q, %v; want nil, nil", blank, got, err)
+		}
+	}
+
+	long := strings.Repeat("a", MaxPatternLen+1)
+	many := strings.Repeat("lo,", MaxPatterns) + "lo"
+	for _, list := range []string{
+		"lo,,docker*",  // empty entry
+		"lo, ,docker*", // entry of spaces only
+		",lo",          // leading separator
+		"lo,",          // trailing separator
+		long,           // pattern too long
+		many,           // too many patterns
+		"eth 0",        // space inside a pattern
+		"eth\t0",       // control character
+		"eth\x000",     // NUL
+		"ethé",         // not ASCII
+	} {
+		if got, err := ValidatePatterns(list); err == nil {
+			t.Errorf("ValidatePatterns(%q) = %q, nil; want an error", list, got)
+		}
+	}
+	if _, err := ValidatePatterns(strings.Repeat("lo,", MaxPatterns-1) + "lo"); err != nil {
+		t.Errorf("ValidatePatterns with %d patterns: %v", MaxPatterns, err)
+	}
+	if _, err := ValidatePatterns(strings.Repeat("a", MaxPatternLen)); err != nil {
+		t.Errorf("ValidatePatterns with a pattern of %d characters: %v", MaxPatternLen, err)
+	}
+}
+
+// TestDefaultExcludeIsValid keeps the built-in list within the limits the
+// panel and the agent enforce on what an operator may type.
+func TestDefaultExcludeIsValid(t *testing.T) {
+	if _, err := ValidatePatterns(strings.Join(DefaultExclude, ",")); err != nil {
+		t.Errorf("DefaultExclude: %v", err)
 	}
 }
