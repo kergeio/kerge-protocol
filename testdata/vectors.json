@@ -1,0 +1,394 @@
+{
+  "version": "kerge.v1",
+  "about": "Conformance vectors for the Kerge agent protocol. Each case feeds input to the receiver named by direction; accept says whether the receiver keeps the message. When canonical is present, the decoded message must re-encode to it, which pins the normalization the receiver applies. See PROTOCOL.md.",
+  "cases": [
+    {
+      "name": "host_info complete",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"host_info\",\"hostname\":\"web-1\",\"os\":\"linux\",\"platform\":\"debian\",\"platform_version\":\"12\",\"kernel\":\"6.1.0\",\"arch\":\"amd64\",\"cpu_model\":\"Xeon\",\"cpu_cores\":2,\"agent_version\":\"0.1.0\",\"interval_ms\":5000}",
+      "accept": true,
+      "canonical": {
+        "type": "host_info",
+        "hostname": "web-1",
+        "os": "linux",
+        "platform": "debian",
+        "platform_version": "12",
+        "kernel": "6.1.0",
+        "arch": "amd64",
+        "cpu_model": "Xeon",
+        "cpu_cores": 2,
+        "agent_version": "0.1.0",
+        "interval_ms": 5000
+      },
+      "note": "Every host_info field carries a value."
+    },
+    {
+      "name": "host_info strings are sanitized",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"host_info\",\"hostname\":\"web\\u0001-1\",\"os\":\"linux\",\"platform\":\"debian\",\"platform_version\":\"12\",\"kernel\":\"6.1.0\",\"arch\":\"amd64\",\"cpu_model\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"cpu_cores\":2,\"agent_version\":\"0.1.0\",\"interval_ms\":5000}",
+      "accept": true,
+      "canonical": {
+        "type": "host_info",
+        "hostname": "web-1",
+        "os": "linux",
+        "platform": "debian",
+        "platform_version": "12",
+        "kernel": "6.1.0",
+        "arch": "amd64",
+        "cpu_model": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "cpu_cores": 2,
+        "agent_version": "0.1.0",
+        "interval_ms": 5000
+      },
+      "note": "Control characters are dropped and strings are cut to 128 characters; the message is kept."
+    },
+    {
+      "name": "host_info interval below the minimum",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"host_info\",\"hostname\":\"web-1\",\"os\":\"linux\",\"platform\":\"debian\",\"platform_version\":\"12\",\"kernel\":\"6.1.0\",\"arch\":\"amd64\",\"cpu_model\":\"Xeon\",\"cpu_cores\":2,\"agent_version\":\"0.1.0\",\"interval_ms\":2999}",
+      "accept": false,
+      "note": "interval_ms must be between 3000 and 60000."
+    },
+    {
+      "name": "host_info interval above the maximum",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"host_info\",\"hostname\":\"web-1\",\"os\":\"linux\",\"platform\":\"debian\",\"platform_version\":\"12\",\"kernel\":\"6.1.0\",\"arch\":\"amd64\",\"cpu_model\":\"Xeon\",\"cpu_cores\":2,\"agent_version\":\"0.1.0\",\"interval_ms\":60001}",
+      "accept": false,
+      "note": "interval_ms must be between 3000 and 60000."
+    },
+    {
+      "name": "host_info with negative cpu_cores",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"host_info\",\"hostname\":\"web-1\",\"os\":\"linux\",\"platform\":\"debian\",\"platform_version\":\"12\",\"kernel\":\"6.1.0\",\"arch\":\"amd64\",\"cpu_model\":\"Xeon\",\"cpu_cores\":-1,\"agent_version\":\"0.1.0\",\"interval_ms\":5000}",
+      "accept": false,
+      "note": "cpu_cores must be between 0 and 4096."
+    },
+    {
+      "name": "host_info with an unknown field",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"host_info\",\"hostname\":\"web-1\",\"os\":\"linux\",\"platform\":\"debian\",\"platform_version\":\"12\",\"kernel\":\"6.1.0\",\"arch\":\"amd64\",\"cpu_model\":\"Xeon\",\"cpu_cores\":2,\"agent_version\":\"0.1.0\",\"interval_ms\":5000,\"shell\":\"/bin/sh\"}",
+      "accept": false,
+      "note": "Decoding is strict: an unknown field rejects the message."
+    },
+    {
+      "name": "metrics complete",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"cpu_percent\":12.5,\"mem_total\":2048000000,\"mem_used\":812000000,\"swap_total\":1073741824,\"swap_used\":0,\"load1\":0.42,\"load5\":0.35,\"load15\":0.3,\"disk_total\":40000000000,\"disk_used\":12000000000,\"disk_free\":26000000000,\"net\":{\"eth0\":{\"rx\":123456789,\"tx\":987654321}},\"uptime\":864000}",
+      "accept": true,
+      "canonical": {
+        "type": "metrics",
+        "ts": 1726560000,
+        "mono_ms": 86400123,
+        "cpu_percent": 12.5,
+        "mem_total": 2048000000,
+        "mem_used": 812000000,
+        "swap_total": 1073741824,
+        "swap_used": 0,
+        "load1": 0.42,
+        "load5": 0.35,
+        "load15": 0.3,
+        "disk_total": 40000000000,
+        "disk_used": 12000000000,
+        "disk_free": 26000000000,
+        "net": {
+          "eth0": {
+            "rx": 123456789,
+            "tx": 987654321
+          }
+        },
+        "uptime": 864000
+      },
+      "note": "Every metrics field carries a value."
+    },
+    {
+      "name": "metrics with no samples",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123}",
+      "accept": true,
+      "canonical": {
+        "type": "metrics",
+        "ts": 1726560000,
+        "mono_ms": 86400123
+      },
+      "note": "Only ts and mono_ms are required. An omitted field means no data this cycle, never zero."
+    },
+    {
+      "name": "metrics cpu at the upper bound",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"cpu_percent\":100}",
+      "accept": true,
+      "canonical": {
+        "type": "metrics",
+        "ts": 1726560000,
+        "mono_ms": 86400123,
+        "cpu_percent": 100
+      },
+      "note": "cpu_percent runs from 0 to 100 inclusive."
+    },
+    {
+      "name": "metrics cpu above 100",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"cpu_percent\":100.1}",
+      "accept": false,
+      "note": "cpu_percent may not exceed 100."
+    },
+    {
+      "name": "metrics cpu below zero",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"cpu_percent\":-0.5}",
+      "accept": false,
+      "note": "cpu_percent may not be negative."
+    },
+    {
+      "name": "metrics with a negative ts",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":-1,\"mono_ms\":86400123}",
+      "accept": false,
+      "note": "ts and mono_ms may not be negative."
+    },
+    {
+      "name": "metrics with a negative mono_ms",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":-1}",
+      "accept": false,
+      "note": "ts and mono_ms may not be negative."
+    },
+    {
+      "name": "metrics with a negative counter",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"mem_total\":-1,\"mem_used\":0}",
+      "accept": false,
+      "note": "Byte counts are unsigned; a negative number rejects the message."
+    },
+    {
+      "name": "metrics with half a memory pair",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"mem_total\":1024}",
+      "accept": false,
+      "note": "mem_total and mem_used are reported together or not at all."
+    },
+    {
+      "name": "metrics with mem_used above mem_total",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"mem_total\":1024,\"mem_used\":2048}",
+      "accept": false,
+      "note": "mem_used may not exceed mem_total."
+    },
+    {
+      "name": "metrics with half a swap pair",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"swap_used\":1}",
+      "accept": false,
+      "note": "swap_total and swap_used are reported together or not at all."
+    },
+    {
+      "name": "metrics with an incomplete disk group",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"disk_total\":10,\"disk_used\":1}",
+      "accept": false,
+      "note": "disk_total, disk_used and disk_free are reported together or not at all."
+    },
+    {
+      "name": "metrics with disk_used above disk_total",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"disk_total\":10,\"disk_used\":11,\"disk_free\":0}",
+      "accept": false,
+      "note": "Neither disk_used nor disk_free may exceed disk_total."
+    },
+    {
+      "name": "metrics with an incomplete load group",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"load1\":0.1,\"load5\":0.1}",
+      "accept": false,
+      "note": "load1, load5 and load15 are reported together or not at all."
+    },
+    {
+      "name": "metrics with a negative load",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"load1\":-0.1,\"load5\":0.1,\"load15\":0.1}",
+      "accept": false,
+      "note": "Load averages may not be negative."
+    },
+    {
+      "name": "metrics with a byte count above a pebibyte",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"mem_total\":1125899906842625,\"mem_used\":0}",
+      "accept": false,
+      "note": "Memory, swap and disk figures are capped at 1 PiB (1125899906842624)."
+    },
+    {
+      "name": "metrics with an uptime above a century",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"uptime\":3153600001}",
+      "accept": false,
+      "note": "uptime is capped at a hundred years (3153600000 seconds)."
+    },
+    {
+      "name": "metrics with an unnamed interface",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"net\":{\"\":{\"rx\":1,\"tx\":1}}}",
+      "accept": false,
+      "note": "An interface name is 1 to 32 printable ASCII characters with no spaces."
+    },
+    {
+      "name": "metrics with a space in an interface name",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"net\":{\"eth 0\":{\"rx\":1,\"tx\":1}}}",
+      "accept": false,
+      "note": "An interface name is 1 to 32 printable ASCII characters with no spaces."
+    },
+    {
+      "name": "metrics with an over-long interface name",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"net\":{\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\":{\"rx\":1,\"tx\":1}}}",
+      "accept": false,
+      "note": "An interface name is 1 to 32 printable ASCII characters with no spaces."
+    },
+    {
+      "name": "metrics with too many interfaces",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"net\":{\"eth0\":{\"rx\":1,\"tx\":1},\"eth1\":{\"rx\":1,\"tx\":1},\"eth2\":{\"rx\":1,\"tx\":1},\"eth3\":{\"rx\":1,\"tx\":1},\"eth4\":{\"rx\":1,\"tx\":1},\"eth5\":{\"rx\":1,\"tx\":1},\"eth6\":{\"rx\":1,\"tx\":1},\"eth7\":{\"rx\":1,\"tx\":1},\"eth8\":{\"rx\":1,\"tx\":1},\"eth9\":{\"rx\":1,\"tx\":1},\"eth10\":{\"rx\":1,\"tx\":1},\"eth11\":{\"rx\":1,\"tx\":1},\"eth12\":{\"rx\":1,\"tx\":1},\"eth13\":{\"rx\":1,\"tx\":1},\"eth14\":{\"rx\":1,\"tx\":1},\"eth15\":{\"rx\":1,\"tx\":1},\"eth16\":{\"rx\":1,\"tx\":1},\"eth17\":{\"rx\":1,\"tx\":1},\"eth18\":{\"rx\":1,\"tx\":1},\"eth19\":{\"rx\":1,\"tx\":1},\"eth20\":{\"rx\":1,\"tx\":1},\"eth21\":{\"rx\":1,\"tx\":1},\"eth22\":{\"rx\":1,\"tx\":1},\"eth23\":{\"rx\":1,\"tx\":1},\"eth24\":{\"rx\":1,\"tx\":1},\"eth25\":{\"rx\":1,\"tx\":1},\"eth26\":{\"rx\":1,\"tx\":1},\"eth27\":{\"rx\":1,\"tx\":1},\"eth28\":{\"rx\":1,\"tx\":1},\"eth29\":{\"rx\":1,\"tx\":1},\"eth30\":{\"rx\":1,\"tx\":1},\"eth31\":{\"rx\":1,\"tx\":1},\"eth32\":{\"rx\":1,\"tx\":1},\"eth33\":{\"rx\":1,\"tx\":1},\"eth34\":{\"rx\":1,\"tx\":1},\"eth35\":{\"rx\":1,\"tx\":1},\"eth36\":{\"rx\":1,\"tx\":1},\"eth37\":{\"rx\":1,\"tx\":1},\"eth38\":{\"rx\":1,\"tx\":1},\"eth39\":{\"rx\":1,\"tx\":1},\"eth40\":{\"rx\":1,\"tx\":1},\"eth41\":{\"rx\":1,\"tx\":1},\"eth42\":{\"rx\":1,\"tx\":1},\"eth43\":{\"rx\":1,\"tx\":1},\"eth44\":{\"rx\":1,\"tx\":1},\"eth45\":{\"rx\":1,\"tx\":1},\"eth46\":{\"rx\":1,\"tx\":1},\"eth47\":{\"rx\":1,\"tx\":1},\"eth48\":{\"rx\":1,\"tx\":1},\"eth49\":{\"rx\":1,\"tx\":1},\"eth50\":{\"rx\":1,\"tx\":1},\"eth51\":{\"rx\":1,\"tx\":1},\"eth52\":{\"rx\":1,\"tx\":1},\"eth53\":{\"rx\":1,\"tx\":1},\"eth54\":{\"rx\":1,\"tx\":1},\"eth55\":{\"rx\":1,\"tx\":1},\"eth56\":{\"rx\":1,\"tx\":1},\"eth57\":{\"rx\":1,\"tx\":1},\"eth58\":{\"rx\":1,\"tx\":1},\"eth59\":{\"rx\":1,\"tx\":1},\"eth60\":{\"rx\":1,\"tx\":1},\"eth61\":{\"rx\":1,\"tx\":1},\"eth62\":{\"rx\":1,\"tx\":1},\"eth63\":{\"rx\":1,\"tx\":1},\"eth64\":{\"rx\":1,\"tx\":1}}}",
+      "accept": false,
+      "note": "A metrics message carries at most 64 interfaces."
+    },
+    {
+      "name": "metrics with an unknown field",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123,\"exec\":\"sh\"}",
+      "accept": false,
+      "note": "Decoding is strict: an unknown field rejects the message."
+    },
+    {
+      "name": "unknown message type",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"command\",\"run\":\"rm -rf /\"}",
+      "accept": false,
+      "note": "The panel accepts host_info and metrics only. There is no command message in the protocol."
+    },
+    {
+      "name": "message with no type",
+      "direction": "agent_to_panel",
+      "input": "{\"ts\":1,\"mono_ms\":2}",
+      "accept": false,
+      "note": "Every message names its type."
+    },
+    {
+      "name": "panel message in the agent direction",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"registered\",\"agent_id\":\"a\",\"secret\":\"b\"}",
+      "accept": false,
+      "note": "Each direction accepts only its own message types."
+    },
+    {
+      "name": "trailing data after the message",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",\"ts\":1726560000,\"mono_ms\":86400123} {}",
+      "accept": false,
+      "note": "One WebSocket message carries exactly one JSON object."
+    },
+    {
+      "name": "message that is not an object",
+      "direction": "agent_to_panel",
+      "input": "[\"metrics\"]",
+      "accept": false,
+      "note": "A message is a JSON object."
+    },
+    {
+      "name": "truncated message",
+      "direction": "agent_to_panel",
+      "input": "{\"type\":\"metrics\",",
+      "accept": false,
+      "note": "Malformed JSON rejects the message."
+    },
+    {
+      "name": "registered",
+      "direction": "panel_to_agent",
+      "input": "{\"type\":\"registered\",\"agent_id\":\"kRr8Qw\",\"secret\":\"Yx7pLq\"}",
+      "accept": true,
+      "canonical": {
+        "type": "registered",
+        "agent_id": "kRr8Qw",
+        "secret": "Yx7pLq"
+      },
+      "note": "The registration result carries the long-lived credential."
+    },
+    {
+      "name": "registered with a dot in agent_id",
+      "direction": "panel_to_agent",
+      "input": "{\"type\":\"registered\",\"agent_id\":\"kRr8.Qw\",\"secret\":\"Yx7pLq\"}",
+      "accept": false,
+      "note": "Neither part may contain a dot: the two are joined with one in the Authorization header."
+    },
+    {
+      "name": "registered with an empty secret",
+      "direction": "panel_to_agent",
+      "input": "{\"type\":\"registered\",\"agent_id\":\"kRr8Qw\",\"secret\":\"\"}",
+      "accept": false,
+      "note": "Both parts are required."
+    },
+    {
+      "name": "registered with an unknown field",
+      "direction": "panel_to_agent",
+      "input": "{\"type\":\"registered\",\"agent_id\":\"kRr8Qw\",\"secret\":\"Yx7pLq\",\"expires_in\":60}",
+      "accept": false,
+      "note": "Decoding is strict: an unknown field rejects the message."
+    },
+    {
+      "name": "error",
+      "direction": "panel_to_agent",
+      "input": "{\"type\":\"error\",\"code\":\"unauthorized\",\"message\":\"unknown credential\"}",
+      "accept": true,
+      "canonical": {
+        "type": "error",
+        "code": "unauthorized",
+        "message": "unknown credential"
+      },
+      "note": "The agent logs the message and ends the connection."
+    },
+    {
+      "name": "error with an unregistered code",
+      "direction": "panel_to_agent",
+      "input": "{\"type\":\"error\",\"code\":\"teapot\",\"message\":\"unknown credential\"}",
+      "accept": true,
+      "canonical": {
+        "type": "error",
+        "code": "teapot",
+        "message": "unknown credential"
+      },
+      "note": "An unknown code is accepted, so that a newer panel can add one without breaking older agents."
+    },
+    {
+      "name": "error message is sanitized",
+      "direction": "panel_to_agent",
+      "input": "{\"type\":\"error\",\"code\":\"unauthorized\",\"message\":\"bad\\u0007token\"}",
+      "accept": true,
+      "canonical": {
+        "type": "error",
+        "code": "unauthorized",
+        "message": "badtoken"
+      },
+      "note": "Control characters are dropped from the human-readable message."
+    },
+    {
+      "name": "error with an upper-case code",
+      "direction": "panel_to_agent",
+      "input": "{\"type\":\"error\",\"code\":\"Unauthorized\",\"message\":\"unknown credential\"}",
+      "accept": false,
+      "note": "A code is 1 to 32 characters of lower-case letters, digits and underscores."
+    },
+    {
+      "name": "error with an empty code",
+      "direction": "panel_to_agent",
+      "input": "{\"type\":\"error\",\"code\":\"\",\"message\":\"unknown credential\"}",
+      "accept": false,
+      "note": "A code is 1 to 32 characters of lower-case letters, digits and underscores."
+    },
+    {
+      "name": "agent message in the panel direction",
+      "direction": "panel_to_agent",
+      "input": "{\"type\":\"host_info\",\"hostname\":\"web-1\",\"os\":\"linux\",\"platform\":\"debian\",\"platform_version\":\"12\",\"kernel\":\"6.1.0\",\"arch\":\"amd64\",\"cpu_model\":\"Xeon\",\"cpu_cores\":2,\"agent_version\":\"0.1.0\",\"interval_ms\":5000}",
+      "accept": false,
+      "note": "Each direction accepts only its own message types."
+    }
+  ]
+}

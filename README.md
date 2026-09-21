@@ -3,6 +3,9 @@
 The wire protocol between a [Kerge](https://kerge.io) agent and a Kerge
 panel, and the reference implementation both sides build on.
 
+`PROTOCOL.md` defines the protocol; `testdata/vectors.json` is a
+language-independent conformance suite for a decoder.
+
 ```
 go get github.com/kergeio/kerge-protocol
 ```
@@ -19,9 +22,9 @@ The module has no dependencies outside the standard library.
 
 ## Status
 
-Pre-release. The protocol is not yet versioned and may change without
-notice; a normative `PROTOCOL.md` and an explicit version handshake are
-being written. Until then the Go packages are the reference.
+Pre-release. The current protocol version is `kerge.v1`, negotiated in the
+WebSocket handshake. Until the first release it may still change without a
+new version token.
 
 ## License
 
