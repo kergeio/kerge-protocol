@@ -190,7 +190,7 @@ group rejects the message.
 
 Interfaces are filtered by the agent before sending, and the panel may
 exclude more by name (§7.5). The counters are the kernel's cumulative
-values, not deltas: rates are derived by the panel (§7.4).
+values, not deltas: rates and traffic are derived by the panel (§7.4).
 
 ### 5.4 `registered` (panel → agent)
 
@@ -271,7 +271,7 @@ The panel timestamps every sample with its **receive time** and stores that.
 `ts` is the agent's own clock, kept for reference; an agent with a wrong
 clock therefore skews nothing.
 
-### 7.4 Rates
+### 7.4 Rates and traffic
 
 Network rates are derived by the panel from two consecutive messages of one
 connection: the difference of a counter divided by the difference of
@@ -286,6 +286,20 @@ a clock step on the host cannot produce a nonsensical rate.
 
 An agent restarts its monotonic clock at zero. That is a decrease, so the
 first sample after an agent restart yields no rate, which is correct.
+
+Traffic, the bytes an interface carried, is accumulated by the panel from
+the same counters. It keeps the last counters of every interface it has seen
+for a host, across connections and restarts of either side, and for each
+sample adds, per interface that counts and per counter:
+
+- nothing, if the interface was never seen before (the host's first report,
+  or a new interface): the sample only establishes its baseline;
+- the current value, if the counter went backwards: the counter was reset,
+  typically by a reboot, so everything it holds is new traffic;
+- the difference to the saved value otherwise.
+
+An interface that disappears keeps its saved counters, and is measured
+against them when it returns. No case yields a negative amount.
 
 ### 7.5 What the panel enforces
 
@@ -354,6 +368,6 @@ this suite in `TestVectors`.
 |---|---|
 | `github.com/kergeio/kerge-protocol` | Messages, strict decoding, validation, version negotiation |
 | `github.com/kergeio/kerge-protocol/ifacefilter` | Interface name matching and the default exclusion list |
-| `github.com/kergeio/kerge-protocol/metering` | Counters to rates (§7.4) |
+| `github.com/kergeio/kerge-protocol/metering` | Counters to rates and traffic (§7.4) |
 
 The module depends on nothing outside the standard library.

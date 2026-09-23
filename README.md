@@ -16,7 +16,7 @@ go get github.com/kergeio/kerge-protocol
 |---|---|
 | `github.com/kergeio/kerge-protocol` | Message types, strict decoding, and validation of untrusted agent input |
 | `github.com/kergeio/kerge-protocol/ifacefilter` | Network interface name matching and the default exclusion list |
-| `github.com/kergeio/kerge-protocol/metering` | Turning the reported counters into network rates |
+| `github.com/kergeio/kerge-protocol/metering` | Turning the reported counters into network rates and traffic |
 
 The module has no dependencies outside the standard library.
 

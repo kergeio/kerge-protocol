@@ -1,6 +1,6 @@
 // Package metering turns the cumulative counters an agent reports into the
-// figures a panel stores: network rates (REQUIREMENTS 3.1.4) and, for
-// traffic accounting, per-interface increments (REQUIREMENTS 3.4).
+// figures a panel stores: network rates (REQUIREMENTS 3.1.4) and the
+// traffic carried since the previous readings (REQUIREMENTS 3.4).
 //
 // It lives beside the protocol because it defines how the reported
 // counters are to be read, which every panel implementation must agree on.
