@@ -99,7 +99,7 @@ func TestTraffic(t *testing.T) {
 }
 
 // A host that reboots between two readings never loses traffic it already
-// counted and never counts a negative amount (REQUIREMENTS 3.4, 12).
+// counted and never counts a negative amount.
 func TestTrafficAcrossAReboot(t *testing.T) {
 	readings := []counters{
 		{"eth0": {RX: 1000, TX: 1000}},

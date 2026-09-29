@@ -1,6 +1,6 @@
 // Package ifacefilter matches network interface names against the wildcard
-// patterns of the exclusion rules (REQUIREMENTS 3.1.3). The agent and the
-// panel both use it so that the two sides never diverge.
+// patterns of the exclusion rules. The agent and the panel both use it so
+// that the two sides never diverge.
 //
 // Only "*" is a metacharacter: it matches any sequence of characters,
 // including none. Matching is case-sensitive and covers the whole name, so
@@ -14,8 +14,7 @@ import (
 )
 
 // DefaultExclude is the exclusion list both sides fall back to: loopback,
-// container, virtual machine, tunnel and VPN interfaces
-// (REQUIREMENTS 3.1.3).
+// container, virtual machine, tunnel and VPN interfaces.
 var DefaultExclude = []string{
 	"lo",
 	"docker*", "veth*", "br-*", "cni*", "flannel*", "cali*", "kube-*",

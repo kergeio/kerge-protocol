@@ -8,8 +8,7 @@ import (
 )
 
 // Traffic returns the bytes received and transmitted since the previous
-// readings, summed over the interfaces of now that exclude does not match
-// (REQUIREMENTS 3.4).
+// readings, summed over the interfaces of now that exclude does not match.
 //
 // previous holds the last counters of every interface of the host seen so
 // far, including interfaces that have since disappeared: the caller keeps

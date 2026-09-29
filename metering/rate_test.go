@@ -43,7 +43,7 @@ func TestRateIsPerHost(t *testing.T) {
 	}
 }
 
-// Rates are only reported when the two clocks agree (REQUIREMENTS 3.1.4).
+// Rates are only reported when the two clocks agree.
 func TestRateNeedsTrustworthyClocks(t *testing.T) {
 	cases := map[string]struct {
 		elapsed time.Duration
@@ -95,7 +95,7 @@ func TestNewInterfaceOnlyEstablishesABaseline(t *testing.T) {
 	}
 }
 
-// Excluded interfaces are left out of the sum (REQUIREMENTS 3.1.3).
+// Excluded interfaces are left out of the sum.
 func TestExcludedInterfaces(t *testing.T) {
 	counters := func(a, b uint64) map[string]protocol.NetCounters {
 		return map[string]protocol.NetCounters{"eth0": {RX: a, TX: a}, "docker0": {RX: b, TX: b}}

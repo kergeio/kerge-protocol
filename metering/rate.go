@@ -1,6 +1,6 @@
 // Package metering turns the cumulative counters an agent reports into the
-// figures a panel stores: network rates (REQUIREMENTS 3.1.4) and the
-// traffic carried since the previous readings (REQUIREMENTS 3.4).
+// figures a panel stores: network rates and the traffic carried since the
+// previous readings.
 //
 // It lives beside the protocol because it defines how the reported
 // counters are to be read, which every panel implementation must agree on.
@@ -60,7 +60,7 @@ func (t *RateTracker[K]) Rate(host K, m *protocol.Metrics, received time.Time, e
 	counters := make(map[string]protocol.NetCounters, len(m.Net))
 	for name, c := range m.Net {
 		// The agent already filtered by its own rules; the panel applies
-		// its own on top (REQUIREMENTS 3.1.3).
+		// its own on top.
 		if !ifacefilter.Match(exclude, name) {
 			counters[name] = c
 		}

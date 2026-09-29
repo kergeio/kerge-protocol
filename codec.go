@@ -50,7 +50,7 @@ func DecodeAgentMessage(data []byte) (AgentMessage, error) {
 
 // DecodePanelMessage decodes one message received from the panel. The agent
 // accepts only the two whitelisted types; anything else is an error and the
-// agent reconnects (REQUIREMENTS 5.1).
+// agent reconnects.
 func DecodePanelMessage(data []byte) (PanelMessage, error) {
 	if len(data) > MaxAgentRead {
 		return nil, ErrTooLarge

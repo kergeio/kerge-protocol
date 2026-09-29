@@ -1,6 +1,6 @@
 // Package protocol defines the JSON messages exchanged between the agent and
-// the panel (REQUIREMENTS 5.3), together with strict decoding (5.1) and the
-// validation the panel applies to untrusted agent input (5.4).
+// the panel, together with strict decoding and the validation the panel
+// applies to untrusted agent input.
 //
 // The agent may only send host_info and metrics; the panel may only reply
 // with registered and error. There is no command message in either direction.
@@ -76,7 +76,7 @@ type Metrics struct {
 	// samples are stored with the panel's receive time.
 	TS int64 `json:"ts"`
 	// MonoMS is the agent's monotonic clock in milliseconds since start,
-	// used for rate calculation (REQUIREMENTS 3.1.4).
+	// used for rate calculation.
 	MonoMS     int64                  `json:"mono_ms"`
 	CPUPercent *float64               `json:"cpu_percent,omitempty"`
 	MemTotal   *uint64                `json:"mem_total,omitempty"`
@@ -96,7 +96,7 @@ type Metrics struct {
 func (*Metrics) isAgentMessage() {}
 
 // Registered carries the long-lived credential created when an agent
-// connects with a one-time enrollment token (REQUIREMENTS 5.2).
+// connects with a one-time enrollment token.
 type Registered struct {
 	Type    string `json:"type"`
 	AgentID string `json:"agent_id"`
@@ -116,9 +116,9 @@ type ErrorMessage struct {
 
 func (*ErrorMessage) isPanelMessage() {}
 
-// Authorization header values (REQUIREMENTS 5.2). The two kinds of
-// credential carry a prefix so that the panel dispatches on it instead of
-// guessing from the shape of the value.
+// Authorization header values. The two kinds of credential carry a prefix
+// so that the panel dispatches on it instead of guessing from the shape of
+// the value.
 const (
 	authScheme = "Bearer "
 	// KindEnroll marks a one-time enrollment token.

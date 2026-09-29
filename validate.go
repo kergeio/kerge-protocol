@@ -8,7 +8,7 @@ import (
 	"unicode"
 )
 
-// Limits applied to untrusted input (REQUIREMENTS 5.4).
+// Limits applied to untrusted input.
 const (
 	maxStringLen     = 128
 	maxMessageLen    = 256

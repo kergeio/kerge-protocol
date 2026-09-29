@@ -251,7 +251,7 @@ func TestMarshalRoundTrip(t *testing.T) {
 }
 
 // Byte counters are bounded so that a hostile agent cannot overflow the
-// INTEGER columns they are stored in (REQUIREMENTS 5.4).
+// INTEGER columns they are stored in.
 func TestByteCountersAreBounded(t *testing.T) {
 	cases := map[string]string{
 		"mem":    `{"type":"metrics","ts":1,"mono_ms":2,"mem_total":18446744073709551615,"mem_used":0}`,

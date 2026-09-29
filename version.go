@@ -4,7 +4,7 @@ import "strings"
 
 // Version is the protocol version this implementation speaks. The agent and
 // the panel agree on it during the WebSocket handshake, before any message
-// is exchanged (REQUIREMENTS 5.1).
+// is exchanged.
 const Version = "kerge.v1"
 
 // SubprotocolHeader carries the offered versions in the handshake. The
